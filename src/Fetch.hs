@@ -1,8 +1,11 @@
 module Fetch (
     fetch,
+    getDomain,
 ) where
 
 import qualified Data.ByteString.Lazy.Char8 as L8
+import Data.List (intercalate)
+import Data.List.Split (splitOn)
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Network.URI (URI (uriAuthority), URIAuth (uriRegName), parseURI)
@@ -25,18 +28,18 @@ fetchGeneric url = do
     response <- httpLbs request manager
     return $ responseBody response
 
+getDomain :: String -> Maybe String
+getDomain urlString = do
+    uri <- parseURI urlString
+    authority <- uriAuthority uri
+    return $ intercalate "." $ reverse $ take 2 $ reverse $ splitOn "." $ uriRegName authority
+
 fetch :: String -> IO L8.ByteString
 fetch url =
     let
-        getDomain :: String -> Maybe String
-        getDomain urlString = do
-            uri <- parseURI urlString
-            authority <- uriAuthority uri
-            return $ uriRegName authority
-
         fetchMethod =
             ( case getDomain url of
-                (Just "www.bettybossi.ch") -> fetchBettyBossy
+                (Just "bettybossi.ch") -> fetchBettyBossy
                 _ -> fetchGeneric
             )
      in

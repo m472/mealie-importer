@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      DataModel
       Fetch
       Scrape
   other-modules:
@@ -35,12 +36,17 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
     , bytestring
+    , extra
     , http-client
     , http-client-tls
     , network-uri
     , scalpel
+    , split
+    , tagsoup
+    , utf8-string
   default-language: Haskell2010
 
 executable mealie-importer-haskell-exe
@@ -53,13 +59,18 @@ executable mealie-importer-haskell-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
     , bytestring
+    , extra
     , http-client
     , http-client-tls
     , mealie-importer-haskell
     , network-uri
     , scalpel
+    , split
+    , tagsoup
+    , utf8-string
   default-language: Haskell2010
 
 test-suite mealie-importer-haskell-test
@@ -73,11 +84,16 @@ test-suite mealie-importer-haskell-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
     , bytestring
+    , extra
     , http-client
     , http-client-tls
     , mealie-importer-haskell
     , network-uri
     , scalpel
+    , split
+    , tagsoup
+    , utf8-string
   default-language: Haskell2010

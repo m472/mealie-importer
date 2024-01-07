@@ -26,6 +26,11 @@ dependencies:
 - bytestring
 - network-uri
 - scalpel
+- utf8-string
+- aeson
+- split
+- tagsoup
+- extra
 
 ghc-options:
 - -Wall
