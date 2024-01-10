@@ -5,6 +5,7 @@ module DataModel (
     export,
     Recipe (..),
     RecipeIngredient (..),
+    RecipeInstruction (..),
 )
 where
 
@@ -23,21 +24,14 @@ data Recipe = Recipe
     , -- , recipeCategory :: [RecipeCategory]
       orgURL :: Maybe String
     , recipeIngredient :: [RecipeIngredient]
+    , recipeInstruction :: [RecipeInstruction]
     }
     deriving (Show, Generic)
-
-instance ToJSON Recipe where
-    toEncoding = genericToEncoding defaultOptions
-instance FromJSON Recipe
 
 newtype RecipeCategory = RecipeCategory
     { categoryName :: String
     }
     deriving (Show, Generic)
-
-instance ToJSON RecipeCategory where
-    toEncoding = genericToEncoding defaultOptions
-instance FromJSON RecipeCategory
 
 data RecipeIngredient = RecipeIngredient
     { quantity :: Maybe Float
@@ -49,17 +43,29 @@ data RecipeIngredient = RecipeIngredient
     }
     deriving (Show, Generic)
 
+data RecipeInstruction = RecipeInstruction
+    { instructionTitle :: String
+    , instructionText :: String
+    }
+    deriving (Show, Generic)
+
+-- Json stuff
+instance ToJSON Recipe where
+    toEncoding = genericToEncoding defaultOptions
+
+instance ToJSON RecipeCategory where
+    toEncoding = genericToEncoding defaultOptions
+
 instance ToJSON RecipeIngredient where
     toJSON
-        ( RecipeIngredient
-                { quantity = quantity'
-                , unit = unit'
-                , food = food'
-                , note = note'
-                , title = title'
-                , originalText = originalText'
-                }
-            ) =
+        RecipeIngredient
+            { quantity = quantity'
+            , unit = unit'
+            , food = food'
+            , note = note'
+            , title = title'
+            , originalText = originalText'
+            } =
             object
                 [ "quantity" .= quantity'
                 , "unit" .= unit'
@@ -70,7 +76,15 @@ instance ToJSON RecipeIngredient where
                 , "originalText" .= originalText'
                 ]
 
-instance FromJSON RecipeIngredient
-
+instance ToJSON RecipeInstruction where
+    toJSON
+        RecipeInstruction
+            { instructionTitle = title'
+            , instructionText = text'
+            } =
+            object
+                [ "title" .= title'
+                , "text" .= text'
+                ]
 export :: Recipe -> String
 export recipe = toString (encode recipe)
