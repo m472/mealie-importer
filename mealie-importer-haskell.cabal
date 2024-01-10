@@ -6,12 +6,12 @@ cabal-version: 2.2
 
 name:           mealie-importer-haskell
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/mealie-importer-haskell#readme>
-homepage:       https://github.com/githubuser/mealie-importer-haskell#readme
-bug-reports:    https://github.com/githubuser/mealie-importer-haskell/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2024 Author name here
+description:    Please see the README on GitHub at <https://github.com/m472/mealie-importer#readme>
+homepage:       https://github.com/m472/mealie-importer#readme
+bug-reports:    https://github.com/m472/mealie-importer/issues
+author:         Mathias Graf
+maintainer:     mathias.n.graf@gmail.com
+copyright:      2024 Mathias Graf
 license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/mealie-importer-haskell
+  location: https://github.com/m472/mealie-importer
 
 library
   exposed-modules:
@@ -44,6 +44,7 @@ library
     , http-client-tls
     , mtl
     , network-uri
+    , optparse-applicative
     , scalpel
     , split
     , tagsoup
@@ -69,6 +70,7 @@ executable mealie-importer-haskell-exe
     , mealie-importer-haskell
     , mtl
     , network-uri
+    , optparse-applicative
     , scalpel
     , split
     , tagsoup
@@ -95,6 +97,7 @@ test-suite mealie-importer-haskell-test
     , mealie-importer-haskell
     , mtl
     , network-uri
+    , optparse-applicative
     , scalpel
     , split
     , tagsoup
