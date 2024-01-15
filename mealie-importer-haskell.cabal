@@ -28,6 +28,7 @@ library
       DataModel
       Fetch
       Scrape
+      Utils
   other-modules:
       Paths_mealie_importer_haskell
   autogen-modules:
@@ -40,11 +41,13 @@ library
     , base >=4.7 && <5
     , bytestring
     , extra
+    , filepath
     , http-client
     , http-client-tls
     , mtl
     , network-uri
     , optparse-applicative
+    , pureMD5
     , scalpel
     , split
     , tagsoup
@@ -65,12 +68,14 @@ executable mealie-importer-haskell-exe
     , base >=4.7 && <5
     , bytestring
     , extra
+    , filepath
     , http-client
     , http-client-tls
     , mealie-importer-haskell
     , mtl
     , network-uri
     , optparse-applicative
+    , pureMD5
     , scalpel
     , split
     , tagsoup
@@ -92,12 +97,14 @@ test-suite mealie-importer-haskell-test
     , base >=4.7 && <5
     , bytestring
     , extra
+    , filepath
     , http-client
     , http-client-tls
     , mealie-importer-haskell
     , mtl
     , network-uri
     , optparse-applicative
+    , pureMD5
     , scalpel
     , split
     , tagsoup

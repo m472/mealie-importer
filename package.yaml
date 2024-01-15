@@ -33,6 +33,8 @@ dependencies:
 - extra
 - mtl
 - optparse-applicative
+- filepath
+- pureMD5
 
 ghc-options:
 - -Wall

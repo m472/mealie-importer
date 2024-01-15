@@ -2,6 +2,7 @@
 
 module Scrape (
     Scrape.scrape,
+    parseRecipe,
 ) where
 
 import Control.Applicative (empty, (<|>))
@@ -25,15 +26,18 @@ type ScraperWithError a = ScraperT String (Writer [Error]) a
 addOrgUrl :: URL -> Recipe -> Recipe
 addOrgUrl url recipe = recipe{orgURL = Just url}
 
+parseRecipe :: URL -> String -> Either Error Recipe
+parseRecipe url =
+    case getDomain url of
+        (Just "rainbowplantlife.com") -> scrapeWPRM
+        (Just "biancazapatka.com") -> scrapeWPRM
+        -- (Just "bettybossi.ch") -> scrapeBettyBossi
+        _ -> const (Left "homepage not (yet) supported")
+
 scrape :: URL -> IO (Either Error Recipe)
 scrape url = do
-    let scrapeMethod = case getDomain url of
-            (Just "rainbowplantlife.com") -> scrapeWPRM
-            (Just "biancazapatka.com") -> scrapeWPRM
-            --(Just "bettybossi.ch") -> scrapeBettyBossi
-            _ -> const (Left "homepage not (yet) supported")
     htmlSource <- Fetch.fetch url
-    return $ addOrgUrl url <$> scrapeMethod (toString htmlSource)
+    return $ addOrgUrl url <$> parseRecipe url (toString htmlSource)
 
 extractTimeWPRM :: String -> ScraperWithError String
 extractTimeWPRM time =
