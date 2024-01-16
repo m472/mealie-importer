@@ -6,16 +6,16 @@ import Control.Monad (zipWithM_)
 import Data.ByteString.Lazy.UTF8 (toString)
 import Data.List (intercalate)
 import Data.Version (Version (versionBranch))
-import Utils (urlToFilename)
 import DataModel (export)
 import Fetch (fetch)
 import Options.Applicative
 import Paths_mealie_importer_haskell (version)
 import Scrape (scrape)
 import System.FilePath (takeDirectory)
+import Utils (urlToFilename)
 
 data Command
-    = ScrapeUrl String
+    = ScrapeUrl !String
     | UpdateTestdata
     | Version
 
@@ -37,11 +37,11 @@ parseArgs =
 
 run :: Command -> IO ()
 run Version =
-    putStrLn
-        $ ("Version: " ++)
-        $ intercalate "."
-        $ map show
-        $ versionBranch Paths_mealie_importer_haskell.version
+    putStrLn $
+        ("Version: " ++) $
+            intercalate "." $
+                map show $
+                    versionBranch Paths_mealie_importer_haskell.version
 run UpdateTestdata = do
     let configPath = "test/data/list.txt"
     urls <- lines <$> readFile configPath

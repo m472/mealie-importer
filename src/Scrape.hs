@@ -32,7 +32,7 @@ parseRecipe url =
         (Just "rainbowplantlife.com") -> scrapeWPRM
         (Just "biancazapatka.com") -> scrapeWPRM
         -- (Just "bettybossi.ch") -> scrapeBettyBossi
-        _ -> const (Left "homepage not (yet) supported")
+        _allOtherDomains -> const (Left "homepage not (yet) supported")
 
 scrape :: URL -> IO (Either Error Recipe)
 scrape url = do
@@ -83,15 +83,15 @@ scrapeWPRM htmlString = processResult $ scrapeStringOrError htmlString recipe
         description' <- text $ "div" @: [hasClass "wprm-recipe-summary"]
         ingredients' <- ingredients
         instructions' <- instructions
-        return
-            $ Recipe
+        return $
+            Recipe
                 { name = recipeTitle
                 , orgURL = Nothing
                 , prepTime = prepTime'
                 , totalTime = totalTime'
                 , cookTime = cookTime'
                 , description = description'
-                , recipeIngredient = concat ingredients'
+                , recipeIngredient = concat $ traceShowId ingredients'
                 , recipeInstruction = concat instructions'
                 }
 
@@ -105,27 +105,28 @@ scrapeWPRM htmlString = processResult $ scrapeStringOrError htmlString recipe
 
     ingredient :: String -> ScraperWithError RecipeIngredient
     ingredient groupName = do
+        let cleanOrigText = unwords . filter (/= "▢") . map trim . words
+
         amount <- text $ "span" @: [hasClass "wprm-recipe-ingredient-amount"]
         unit' <- text $ "span" @: [hasClass "wprm-recipe-ingredient-unit"]
         food' <- text $ "span" @: [hasClass "wprm-recipe-ingredient-name"]
-        note' <- text $ "span" @: [hasClass "wprm-recipe-ingredient-notes"]
-        origText' <- text $ "li" @: [hasClass "wprm-recipe-ingredient"]
+        note' <- text ("span" @: [hasClass "wprm-recipe-ingredient-notes"]) <|> pure ""
+        origText' <- cleanOrigText <$> text ("li" @: [hasClass "wprm-recipe-ingredient"])
         pos <- position
 
-        let cleanOrigText = unwords . filter (/= "▢") . map trim . words
         let title' = case pos of
                 0 -> Just groupName
                 _ -> Nothing
 
-        return
-            $ case readQuantity amount of
+        return $
+            case readQuantity amount of
                 Nothing ->
                     RecipeIngredient
                         { quantity = Nothing
                         , unit = Nothing
                         , food = amount ++ " " ++ unit' ++ " " ++ food'
                         , note = note'
-                        , originalText = cleanOrigText origText'
+                        , originalText = origText'
                         , title = title'
                         }
                 (Just parsedAmount) ->
@@ -134,7 +135,7 @@ scrapeWPRM htmlString = processResult $ scrapeStringOrError htmlString recipe
                         , unit = Just unit'
                         , food = food'
                         , note = note'
-                        , originalText = cleanOrigText origText'
+                        , originalText = origText'
                         , title = title'
                         }
 
@@ -150,8 +151,8 @@ scrapeWPRM htmlString = processResult $ scrapeStringOrError htmlString recipe
     instruction groupName = do
         text' <- text $ "div" @: [hasClass "wprm-recipe-instruction-text"]
         pos <- position
-        return
-            $ RecipeInstruction
+        return $
+            RecipeInstruction
                 { instructionText = text'
                 , instructionTitle = if pos == 0 then groupName else ""
                 }

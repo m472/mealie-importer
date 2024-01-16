@@ -15,16 +15,16 @@ import Data.Maybe (isNothing)
 import GHC.Generics
 
 data Recipe = Recipe
-    { name :: String
-    , totalTime :: String
-    , prepTime :: String
-    , cookTime :: String
-    , -- , performTime :: String
-      description :: String
-    , -- , recipeCategory :: [RecipeCategory]
-      orgURL :: Maybe String
-    , recipeIngredient :: [RecipeIngredient]
-    , recipeInstruction :: [RecipeInstruction]
+    { name :: !String
+    , totalTime :: !String
+    , prepTime :: !String
+    , cookTime :: !String
+    , -- , performTime :: !String
+      description :: !String
+    , -- , recipeCategory :: ![RecipeCategory]
+      orgURL :: !(Maybe String)
+    , recipeIngredient :: ![RecipeIngredient]
+    , recipeInstruction :: ![RecipeInstruction]
     }
     deriving (Show, Generic)
 
@@ -34,18 +34,18 @@ newtype RecipeCategory = RecipeCategory
     deriving (Show, Generic)
 
 data RecipeIngredient = RecipeIngredient
-    { quantity :: Maybe Float
-    , unit :: Maybe String
-    , food :: String
-    , note :: String
-    , title :: Maybe String
-    , originalText :: String
+    { quantity :: !(Maybe Float)
+    , unit :: !(Maybe String)
+    , food :: !String
+    , note :: !String
+    , title :: !(Maybe String)
+    , originalText :: !String
     }
     deriving (Show, Generic)
 
 data RecipeInstruction = RecipeInstruction
-    { instructionTitle :: String
-    , instructionText :: String
+    { instructionTitle :: !String
+    , instructionText :: !String
     }
     deriving (Show, Generic)
 
