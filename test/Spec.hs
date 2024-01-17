@@ -14,4 +14,4 @@ main = do
     test :: URL -> String -> IO ()
     test url html = case parseRecipe url html of
         (Left _) -> error "this is an error"
-        (Right _) -> return ()
+        (Right _) -> putStrLn ("Success: " ++ url)

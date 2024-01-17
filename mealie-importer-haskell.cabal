@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -40,6 +40,7 @@ library
       aeson
     , base >=4.7 && <5
     , bytestring
+    , containers
     , extra
     , filepath
     , http-client
@@ -67,6 +68,7 @@ executable mealie-importer-haskell-exe
       aeson
     , base >=4.7 && <5
     , bytestring
+    , containers
     , extra
     , filepath
     , http-client
@@ -96,6 +98,7 @@ test-suite mealie-importer-haskell-test
       aeson
     , base >=4.7 && <5
     , bytestring
+    , containers
     , extra
     , filepath
     , http-client

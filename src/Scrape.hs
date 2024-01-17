@@ -9,7 +9,10 @@ import Control.Applicative (empty, (<|>))
 import Control.Monad.Writer (Writer, runWriter)
 import Control.Monad.Writer.Class (tell)
 import Data.ByteString.Lazy.UTF8 (toString)
-import Data.List.Extra (trim)
+import Data.Char (isNumber)
+import Data.List.Extra (dropSuffix, dropWhileEnd, trim)
+import Data.Set (fromList, member)
+import Data.Tuple.Extra (both)
 import DataModel (
     Recipe (..),
     RecipeIngredient (..),
@@ -31,7 +34,7 @@ parseRecipe url =
     case getDomain url of
         (Just "rainbowplantlife.com") -> scrapeWPRM
         (Just "biancazapatka.com") -> scrapeWPRM
-        -- (Just "bettybossi.ch") -> scrapeBettyBossi
+        (Just "bettybossi.ch") -> scrapeBettyBossi
         _allOtherDomains -> const (Left "homepage not (yet) supported")
 
 scrape :: URL -> IO (Either Error Recipe)
@@ -55,6 +58,23 @@ readQuantity "¼" = Just 0.25
 readQuantity "½" = Just 0.5
 readQuantity "¾" = Just 0.75
 readQuantity s = readMaybe s
+
+trimCharsStart :: [Char] -> String -> String
+trimCharsStart chrs = dropWhile (`member` charSet)
+  where
+    charSet = fromList chrs
+
+trimCharsEnd :: [Char] -> String -> String
+trimCharsEnd chrs = dropWhileEnd (`member` charSet)
+  where
+    charSet = fromList chrs
+
+trimChars :: [Char] -> String -> String
+trimChars chr = trimCharsStart chr . trimCharsEnd chr
+
+-- | Trim common characters from start and end
+trimStuff :: String -> String
+trimStuff = trimChars ":;, \t\n\r"
 
 logError :: String -> ScraperWithError a
 logError message = do
@@ -157,19 +177,18 @@ scrapeWPRM htmlString = processResult $ scrapeStringOrError htmlString recipe
                 , instructionTitle = if pos == 0 then groupName else ""
                 }
 
-{-
 scrapeBettyBossi :: String -> Either Error Recipe
 scrapeBettyBossi htmlString = processResult $ scrapeStringOrError htmlString recipe
   where
     recipe :: ScraperWithError Recipe
     recipe = do
         recipeTitle <- text $ "h1" @: [hasClass "title"]
-        prepTime' <- text $ "div" @: map hasClass ["icon-duration", "bb-tag", "bb-icon-tag"]
+        prepTime' <- trimStuff . dropWhile (/= ':') <$> text ("div" @: map hasClass ["icon-duration", "bb-tag", "bb-icon-tag"])
         description' <- text $ "p" @: [hasClass "description"]
         ingredients' <- ingredients
         instructions' <- instructions
-        return
-            $ Recipe
+        return $
+            Recipe
                 { name = recipeTitle
                 , orgURL = Nothing
                 , prepTime = prepTime'
@@ -181,22 +200,25 @@ scrapeBettyBossi htmlString = processResult $ scrapeStringOrError htmlString rec
                 }
 
     ingredients :: ScraperWithError [RecipeIngredient]
-    ingredients = chroots ("section" @: [hasClass "bb-recipe-ingredients"]) ingredient
+    ingredients = chroots "tr" ingredient
 
     ingredient :: ScraperWithError RecipeIngredient
     ingredient = do
-        amount <- text $ "span" @: [hasClass "wprm-recipe-ingredient-amount"]
-        food' <- text $ "span" @: [hasClass "wprm-recipe-ingredient-name"]
-        note' <- text $ "span" @: [hasClass "wprm-recipe-ingredient-notes"]
-        origText' <- text $ "li" @: [hasClass "wprm-recipe-ingredient"]
+        let reduceWhitespace = unwords . concatMap words . lines
+        amount <- text ("td" @: [hasClass "quantity"])
+        note' <- trimStuff <$> text ("span" @: [hasClass "post-ingredient"]) <|> pure ""
+        food' <- trimStuff . dropSuffix note' <$> text ("td" @: [hasClass "ingredient"])
+        origText' <- reduceWhitespace <$> text anySelector
 
-        return
-            $ case readQuantity amount of
+        let (q, u) = both trim $ span isNumber amount
+
+        return $
+            case readQuantity q of
                 Nothing ->
                     RecipeIngredient
                         { quantity = Nothing
                         , unit = Nothing
-                        , food = amount ++ " " ++ food'
+                        , food = reduceWhitespace (amount ++ " " ++ food')
                         , note = note'
                         , originalText = origText'
                         , title = Nothing
@@ -204,7 +226,7 @@ scrapeBettyBossi htmlString = processResult $ scrapeStringOrError htmlString rec
                 (Just parsedAmount) ->
                     RecipeIngredient
                         { quantity = Just parsedAmount
-                        , unit = Just unit'
+                        , unit = Just u
                         , food = food'
                         , note = note'
                         , originalText = origText'
@@ -212,14 +234,13 @@ scrapeBettyBossi htmlString = processResult $ scrapeStringOrError htmlString rec
                         }
 
     instructions :: ScraperWithError [RecipeInstruction]
-    instructions = chroots ("section" @: [hasClass "bb-recipe-steps"]) instruction
+    instructions = chroots ("li" @: [hasClass "recipeInstructions"]) instruction
 
     instruction :: ScraperWithError RecipeInstruction
     instruction = do
-        text' <- text $ "li" @: [hasClass "recipeInstructions"]
-        return
-            $ RecipeInstruction
+        text' <- text anySelector
+        return $
+            RecipeInstruction
                 { instructionText = text'
                 , instructionTitle = ""
                 }
--}

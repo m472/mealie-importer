@@ -6,7 +6,7 @@ import Control.Monad (zipWithM_)
 import Data.ByteString.Lazy.UTF8 (toString)
 import Data.List (intercalate)
 import Data.Version (Version (versionBranch))
-import DataModel (export)
+import DataModel (export, Recipe (recipeIngredient))
 import Fetch (fetch)
 import Options.Applicative
 import Paths_mealie_importer_haskell (version)

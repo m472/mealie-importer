@@ -35,6 +35,7 @@ dependencies:
 - optparse-applicative
 - filepath
 - pureMD5
+- containers
 
 ghc-options:
 - -Wall
