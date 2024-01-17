@@ -40,7 +40,7 @@ fetch url =
         fetchMethod =
             ( case getDomain url of
                 (Just "bettybossi.ch") -> fetchBettyBossy
-                _ -> fetchGeneric
+                _allOtherDomains -> fetchGeneric
             )
      in
         fetchMethod url

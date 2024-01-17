@@ -34,7 +34,9 @@ parseRecipe url =
     case getDomain url of
         (Just "rainbowplantlife.com") -> scrapeWPRM
         (Just "biancazapatka.com") -> scrapeWPRM
+        (Just "eat-this.org") -> scrapeWPRM
         (Just "bettybossi.ch") -> scrapeBettyBossi
+        Nothing -> const (Left "could not extract domain")
         _allOtherDomains -> const (Left "homepage not (yet) supported")
 
 scrape :: URL -> IO (Either Error Recipe)
@@ -82,6 +84,12 @@ logError message = do
     tell [message ++ " " ++ currentHtml]
     empty
 
+continueWithInfo :: String -> ScraperWithError a -> ScraperWithError a
+continueWithInfo message scraper = do
+    currentHtml <- html anySelector
+    tell [message ++ " " ++ currentHtml]
+    scraper
+
 scrapeStringOrError :: String -> ScraperWithError a -> (Maybe a, [Error])
 scrapeStringOrError html' scraper = runWriter $ scrapeStringLikeT html' scraper
 
@@ -100,9 +108,9 @@ scrapeWPRM htmlString = processResult $ scrapeStringOrError htmlString recipe
         prepTime' <- extractTimeWPRM "prep"
         totalTime' <- extractTimeWPRM "total"
         cookTime' <- extractTimeWPRM "cook"
-        description' <- text $ "div" @: [hasClass "wprm-recipe-summary"]
-        ingredients' <- ingredients
-        instructions' <- instructions
+        description' <- text ("div" @: [hasClass "wprm-recipe-summary"]) <|> continueWithInfo "could not parse description" (pure "")
+        ingredients' <- ingredients <|> logError "could not parse ingredients"
+        instructions' <- instructions <|> logError "could not parse instructions"
         return $
             Recipe
                 { name = recipeTitle
