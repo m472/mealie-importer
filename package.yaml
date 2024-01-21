@@ -36,6 +36,11 @@ dependencies:
 - filepath
 - pureMD5
 - containers
+- time
+- text
+- servant
+- servant-client
+- transformers-either
 
 ghc-options:
 - -Wall
